@@ -128,49 +128,57 @@ The backend is built with Spring Boot 3.x, using:
 
 ## Frontend
 
-- Built using vanilla JavaScript
-- Served from:
-
-
-src/main/resources/static
-
+The frontend is a single-page-like application using vanilla JavaScript, HTML, and CSS, served from Spring Boot static resources.
 
 ---
 
-## Shared JS
+## Features
 
-- Stores JWT in localStorage (`auction_token`)
-- Adds Authorization header to API calls
-- Uses helper function for API requests
+- Dashboard: Displays total auctions, active auctions, and user bids  
+- Auctions Listing: View all auctions (active and closed)  
+- Create Auction: Form to create new auctions with optional image upload  
+- Bidding System: Place bids and view bid history  
+- User Profile: Update profile and change password  
+- Authentication: Login and register with JWT-based authentication  
+- Navigation: Dynamic navbar and sidebar based on login state  
 
-- Handles:
-  - Headers automatically
-  - Error responses properly
+---
 
-### Navigation
+## Technologies
 
-- Logged out:
-  - Home, Login, Register
+- HTML5: Structure  
+- CSS3: Styling and responsive design  
+- JavaScript (ES6+): UI logic and API integration  
 
-- Logged in:
-  - Dashboard, Create Auction, Auctions, My Auctions, My Bids, Logout
+---
 
-- Includes sidebar drawer with navigation and profile
+## Key Files
 
+- `index.html`: Landing page  
+- `login.html`: Login page  
+- `register.html`: Registration page  
+- `dashboard.html`: User dashboard  
+- `auctions.html`: Auctions listing  
+- `create-auction.html`: Create auction form  
+- `auction-detail.html`: Auction details and bidding  
+- `profile.html`: User profile  
+- `app.js`: Handles UI logic, API calls, and authentication  
+- `style.css`: Styling  
 
 
 
 
 ## Getting Started
 
-### Prerequisites
+### 1. Prerequisites
 
 - Java 21+
 - Maven (or mvnw wrapper)
 - MySQL (or your configured SQL DB)
 
+---
 
-### Run the backend
+### 2. Run the Backend
 
 ./mvnw spring-boot:run
 
@@ -181,20 +189,21 @@ mvn spring-boot:run
 The application will start on the configured port (e.g. http://localhost:8080).
 
 
-### Access the UI
+### 3. Access the UI
 
-Open http://localhost:8080 in your browser.
+- Open http://localhost:8080 in your browser  
 
-From the Home page (Bid Market landing), you can:
-- Register a new account.
-- Log in and access the dashboard, auctions, etc.
+- From the Home page (Bid Market landing), you can:
+  - Register a new account  
+  - Log in and access the dashboard, auctions, etc.  
 
 
-### API Testing
+### 4. API Testing
 
-Use a REST client (Postman, VS Code REST Client, etc.) against endpoints under /api/....
+- Use a REST client (Postman, VS Code REST Client, etc.)  
+- Test endpoints under `/api/...`
 
-Authenticate first via POST /api/auth/login to obtain a JWT token; send it as a Bearer token in the Authorization header.
+
 
 
 ## Notes
@@ -219,7 +228,7 @@ Authenticate first via POST /api/auth/login to obtain a JWT token; send it as a 
 
 
 ### Dashboard
-![Dashboard](References%20of%20the%20site/dashborad.png)
+![Dashboard](References%20of%20the%20site/dashboard.png)
 
 
 ### Create Auction
