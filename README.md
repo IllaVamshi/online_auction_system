@@ -130,7 +130,6 @@ The backend is built with Spring Boot 3.x, using:
 
 The frontend is a single-page-like application using vanilla JavaScript, HTML, and CSS, served from Spring Boot static resources.
 
----
 
 ## Features
 
@@ -142,7 +141,6 @@ The frontend is a single-page-like application using vanilla JavaScript, HTML, a
 - Authentication: Login and register with JWT-based authentication  
 - Navigation: Dynamic navbar and sidebar based on login state  
 
----
 
 ## Technologies
 
@@ -150,7 +148,6 @@ The frontend is a single-page-like application using vanilla JavaScript, HTML, a
 - CSS3: Styling and responsive design  
 - JavaScript (ES6+): UI logic and API integration  
 
----
 
 ## Key Files
 
@@ -176,15 +173,14 @@ The frontend is a single-page-like application using vanilla JavaScript, HTML, a
 - Maven (or mvnw wrapper)
 - MySQL (or your configured SQL DB)
 
----
 
 ### 2. Run the Backend
 
-./mvnw spring-boot:run
+- ./mvnw spring-boot:run
 
-or
+  or
 
-mvn spring-boot:run
+- mvn spring-boot:run
 
 The application will start on the configured port (e.g. http://localhost:8080).
 
