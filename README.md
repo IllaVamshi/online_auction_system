@@ -55,223 +55,110 @@ The backend is built with Spring Boot 3.x, using:
 
 ### AuthController
 
-Authentication endpoints:
-
-- POST /api/auth/register – Register a new user.
-- POST /api/auth/login – Authenticate and return a JWT token.
-
+- POST `/api/auth/register` – Register a new user
+- POST `/api/auth/login` – Authenticate and return JWT token
 
 ### AuctionController
 
-- GET /api/auctions – List all auctions (active + closed, active first).
-- GET /api/auctions/active – List only active auctions (used by dashboard).
-- GET /api/auctions/{id} – Get details for a specific auction.
-- GET /api/auctions/{id}/bids – Get bids for an auction.
-- GET /api/auctions/{id}/highest-bid – Get highest bid for an auction.
-- GET /api/auctions/my – Get auctions created by the logged-in user.
-- GET /api/auctions/dashboard/stats – Dashboard metrics (total vs active auctions).
-- POST /api/auctions – Create a new auction (authenticated).
-- PUT /api/auctions/{id} – Update an auction (owner only).
-- DELETE /api/auctions/{id} – Delete an auction (owner only).
-
+- GET `/api/auctions` – List all auctions (active + closed, active first)
+- GET `/api/auctions/active` – List only active auctions
+- GET `/api/auctions/{id}` – Get auction details
+- GET `/api/auctions/{id}/bids` – Get auction bids
+- GET `/api/auctions/{id}/highest-bid` – Get highest bid
+- GET `/api/auctions/my` – Get user auctions
+- GET `/api/auctions/dashboard/stats` – Dashboard metrics
+- POST `/api/auctions` – Create auction
+- PUT `/api/auctions/{id}` – Update auction (owner only)
+- DELETE `/api/auctions/{id}` – Delete auction (owner only)
 
 ### BidController
 
-- POST /api/bids/place – Place a bid on an auction.
-- GET /api/bids/auction/{auctionId} – List bids for a given auction.
-- GET /api/bids/auction/{auctionId}/highest – Highest bid for an auction.
-- GET /api/bids/my – Bids placed by the current user.
-
+- POST `/api/bids/place` – Place bid
+- GET `/api/bids/auction/{auctionId}` – List bids
+- GET `/api/bids/auction/{auctionId}/highest` – Highest bid
+- GET `/api/bids/my` – User bids
 
 ### UserController
 
-- GET /api/users/profile – Get current user profile.
-- PUT /api/users/profile – Update profile name.
-- POST /api/users/change-password – Change user password (validates current password and returns clear error messages).
-
+- GET `/api/users/profile` – Get profile
+- PUT `/api/users/profile` – Update profile name
+- POST `/api/users/change-password` – Change password
 
 ### AuctionScheduler
 
-- Runs periodically (e.g. every minute).
-- Finds auctions whose endTime has passed and closed = false.
-- Determines highest bid for each such auction:
-  - Sets winner on the Auction entity when bids exist.
-  - Marks the auction as closed so frontend shows it as “Closed”.
-- Saves updated auctions.
+- Runs periodically (every minute)
+- Finds expired auctions (endTime passed and not closed)
+- Determines highest bid
+- Sets winner if bids exist
+- Marks auction as closed
+- Saves updated auctions
+
 
 
 ## Configuration
 
-- Database: Configured in application.properties (e.g. MySQL on auction_system schema).
-- JWT:
-  - Secret: app.jwt.secret
-  - Expiration: app.jwt.expiration-ms
-- Port: Default 8080 (or as configured in application.properties).
-- JPA: spring.jpa.hibernate.ddl-auto=update (auto create/update tables in dev).
+- Database configured in `application.properties`
+- MySQL schema: `auction_system`
 
-Uploads (optional feature):
+### JWT
 
-- app.upload.dir=uploads – directory for image uploads, served under /uploads/**.
+- Secret: `app.jwt.secret`
+- Expiration: `app.jwt.expiration-ms`
 
-SecurityConfig sets:
+### Application
 
-- Public endpoints for:
-  - /api/auth/**, /, static pages, CSS/JS, images, uploaded images.
-- JWT-protected endpoints for auctions, bids, profile, and password change.
-- CORS allowed for typical localhost dev origins.
+- Runs on port `8080` (default)
+- JPA: `spring.jpa.hibernate.ddl-auto=update`
 
+### Uploads
 
-## Domain Model
+- Directory: `uploads`
+- Served via `/uploads/**`
 
-### User
+### Security
 
-- id, name, email, password, createdAt
-
-One-to-many:
-- auctions – auctions created by the user.
-- bids – bids placed by the user.
+- Public endpoints:
+  - `/api/auth/**`, `/`, static files
+- Protected endpoints:
+  - Auctions, bids, profile, password
+- CORS enabled for localhost
 
 
-### Auction
-
-- id, title, description, startingPrice, currentPrice, endTime, imageUrl, closed
-
-Many-to-one:
-- createdBy (User)
-- winner (User, nullable)
-
-One-to-many:
-- bids – list of bids.
-
-
-### Bid
-
-- id, amount, bidTime
-
-Many-to-one:
-- auction
-- bidder (User)
-
-DTOs (AuctionDto, BidDto, UserProfileDto) are used to shape responses for the frontend.
 
 
 ## Frontend
 
-The frontend is a vanilla JavaScript single-page-like app served from src/main/resources/static.
+- Built using vanilla JavaScript
+- Served from:
 
 
-### Shared JS (static/js/app.js)
-
-Manages JWT token:
-
-- Stores token in localStorage as auction_token.
-- Adds Authorization: Bearer <token> to API calls when logged in.
-
-apiRequest(path, options) helper wraps fetch and:
-
-- Automatically sets headers.
-- Handles JSON errors and surfaces meaningful messages.
-
-Dynamically renders the top navbar based on auth state:
-
-- When logged out: Home, Login, Register.
-- When logged in: Dashboard, Create Auction, Auctions, My Auctions, My Bids, Logout.
-
-Creates a right-side drawer sidebar when logged in with the same navigation options and a profile entry.
+src/main/resources/static
 
 
-## Key Pages
+---
 
-### Home (index.html)
+## Shared JS
 
-- Marketing-style hero section:
-  - Tagline, gradient headline, CTA buttons (“Get Started Free”, “Sign In”).
-- Short “Why us” section with three feature cards (easy bidding, secure, 24/7).
-- Visible only when logged out (logged-in users are redirected to dashboard.html).
+- Stores JWT in localStorage (`auction_token`)
+- Adds Authorization header to API calls
+- Uses helper function for API requests
 
+- Handles:
+  - Headers automatically
+  - Error responses properly
 
-### Login / Register
+### Navigation
 
-- Centered card forms with icons and validation.
-- Use apiRequest('/auth/login') and /auth/register.
-- On successful login, store token then redirect to dashboard.html.
+- Logged out:
+  - Home, Login, Register
 
+- Logged in:
+  - Dashboard, Create Auction, Auctions, My Auctions, My Bids, Logout
 
-### Dashboard (dashboard.html)
-
-- Compact metric cards:
-  - Total Auctions, Active Auctions, My Bids.
-- “Latest Auctions” grid:
-  - Shows only active auctions, via GET /api/auctions/active.
-- View Details links to auction-detail.html?id=....
-- Responsive layout, no horizontal scroll.
+- Includes sidebar drawer with navigation and profile
 
 
-### Auctions (auctions.html)
 
-- Lists all auctions from GET /api/auctions.
-- Active auctions are shown first; closed auctions below.
-
-Each card shows:
-- Status badge (Active or Closed).
-- Title, description, current bid, remaining time / “Ended”.
-
-For closed auctions:
-- Winner name + winning amount, or “Winner: No bids placed”.
-
-- View Details button.
-
-
-### Create Auction
-
-- Vertical form:
-  - Title, starting price, description, end time.
-- Optional image URL and/or image file upload.
-
-Image upload:
-- Shows a preview.
-- If a file is chosen, it is POSTed to /api/uploads and the returned URL is stored in imageUrl.
-
-- On success, redirects back to dashboard.
-
-
-### My Auctions / My Bids
-
-- My Auctions: All auctions where the current user is creator.
-- My Bids: All bids placed by current user.
-
-Both pages render cards/tables with key information and links to details.
-
-
-### Auction Detail (auction-detail.html)
-
-- Shows a single auction with image, title, description, prices, status, creator and winner info.
-
-Bidding section (if auction is open and user is logged in):
-- Enter bid amount and place bid via /api/bids/place.
-
-Bids list:
-- Shows history of bids with bidder names and timestamps.
-
-When auction is ended:
-- Displays winner name and winning bid; or “No bids placed”.
-
-If the logged-in user is the winner:
-- Shows a banner: “You won this auction. Congratulations!”.
-
-
-### Profile (profile.html)
-
-- Left card: Profile information (name editable, email/user ID/role read-only).
-- Right card: Change password form.
-
-Uses:
-- GET /api/users/profile to load data.
-- PUT /api/users/profile to update name.
-- POST /api/users/change-password to update password.
-
-If current password is wrong:
-- Shows a friendly message (“Current password is incorrect”) from backend.
 
 
 ## Getting Started
@@ -286,7 +173,9 @@ If current password is wrong:
 ### Run the backend
 
 ./mvnw spring-boot:run
+
 or
+
 mvn spring-boot:run
 
 The application will start on the configured port (e.g. http://localhost:8080).
@@ -314,4 +203,41 @@ Authenticate first via POST /api/auth/login to obtain a JWT token; send it as a 
 - Static assets (HTML/CSS/JS) are served directly by Spring Boot from src/main/resources/static.
 - Auction closing and winner determination are handled automatically by the scheduled AuctionScheduler.
 - Password change and validation errors return clear JSON messages, used by the frontend to show friendly error alerts.
+
+## References of the site
+
+### Home Page
+![Home](References%20of%20the%20site/home.png)
+
+
+### Register Page
+![Register](References%20of%20the%20site/register.png)
+
+
+### Login Page
+![Login](References%20of%20the%20site/login.png)
+
+
+### Dashboard
+![Dashboard](References%20of%20the%20site/dashborad.png)
+
+
+### Create Auction
+![Create Auction](References%20of%20the%20site/create%20auction.png)
+
+
+### Auction Details
+![Auction Details](References%20of%20the%20site/auction%20details.png)
+
+
+### My Bids
+![My Bids](References%20of%20the%20site/my%20bids.png)
+
+
+### Sidebar
+![Sidebar](References%20of%20the%20site/sidebar.png)
+
+
+### Profile
+![Profile](References%20of%20the%20site/profile.png)
 
