@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile - Bid Market</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div id="main-nav"></div>
+<div class="d-flex">
+  <!-- Main Content -->
+  <div class="flex-grow-1">
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <h1 class="h3 mb-4"><i class="fas fa-user me-2"></i>My Profile</h1>
+
+          <div class="row">
+            <!-- Profile Information -->
+            <div class="col-12 col-lg-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Profile Information</h5>
+                </div>
+                <div class="card-body">
+                  <div id="profileAlert"></div>
+                  <form id="profileForm">
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <input type="text" class="form-control" id="name" placeholder="Full Name" required>
+                          <label for="name">Full Name</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <input type="email" class="form-control" id="email" placeholder="Email" readonly>
+                          <label for="email">Email Address</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <input type="text" class="form-control" id="accountId" placeholder="Account ID" readonly>
+                          <label for="accountId">Account ID</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <input type="text" class="form-control" id="role" placeholder="Role" readonly>
+                          <label for="role">Role</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save me-2"></i>Update Profile
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="col-12 col-lg-6 mt-4 mt-lg-0">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="fas fa-lock me-2"></i>Change Password</h5>
+                </div>
+                <div class="card-body">
+                  <div id="passwordAlert"></div>
+                  <form id="passwordForm">
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <input type="password" class="form-control" id="currentPassword" placeholder="Current Password" required>
+                          <label for="currentPassword">Current Password</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <input type="password" class="form-control" id="newPassword" placeholder="New Password" required>
+                          <label for="newPassword">New Password</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm New Password" required>
+                          <label for="confirmPassword">Confirm New Password</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="alert alert-info mb-0">
+                          <i class="fas fa-info-circle me-2"></i>
+                          Password must be at least 6 characters long.
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-key me-2"></i>Change Password
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  // Load profile data
+  function loadProfile() {
+    apiRequest('/users/profile')
+      .then(profile => {
+        document.getElementById('name').value = profile.name;
+        document.getElementById('email').value = profile.email;
+        document.getElementById('accountId').value = profile.id;
+        document.getElementById('role').value = profile.role;
+      })
+      .catch(err => {
+        document.getElementById('profileAlert').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      });
+  }
+
+  // Handle profile update
+  document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+
+    apiRequest('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ name })
+    })
+    .then(() => {
+      document.getElementById('profileAlert').innerHTML = '<div class="alert alert-success">Profile updated successfully!</div>';
+      setTimeout(() => {
+        document.getElementById('profileAlert').innerHTML = '';
+      }, 3000);
+    })
+    .catch(err => {
+      document.getElementById('profileAlert').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+    });
+  });
+
+  // Handle password change
+  document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+      document.getElementById('passwordAlert').innerHTML = '<div class="alert alert-danger">New passwords do not match.</div>';
+      return;
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      document.getElementById('passwordAlert').innerHTML = '<div class="alert alert-danger">New password must be at least 6 characters long.</div>';
+      return;
+    }
+
+    apiRequest('/users/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+    })
+    .then(() => {
+      document.getElementById('passwordAlert').innerHTML = '<div class="alert alert-success">Password changed successfully!</div>';
+      document.getElementById('passwordForm').reset();
+      setTimeout(() => {
+        document.getElementById('passwordAlert').innerHTML = '';
+      }, 4000);
+    })
+    .catch(err => {
+      document.getElementById('passwordAlert').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+    });
+  });
+
+  // Load data on page load
+  loadProfile();
+</script>
+</body>
+</html>

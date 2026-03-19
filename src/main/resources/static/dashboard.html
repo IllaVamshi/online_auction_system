@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bid Market - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div id="main-nav"></div>
+<div class="d-flex">
+  <!-- Main Content -->
+  <div class="flex-grow-1">
+    <div class="container-fluid py-4">
+      <div class="page-header mb-4">
+        <div>
+          <div class="page-header-title"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</div>
+          <div class="page-header-subtitle">Overview of your auctions, activity, and bidding performance.</div>
+        </div>
+        <div class="page-header-meta">
+          <i class="fas fa-bell me-1"></i>Stay updated with live auction stats
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="row mb-3 dashboard-metrics">
+            <div class="col-md-4 mb-3 mb-md-0 fade-in-up">
+              <div class="card text-center metric-card">
+                <div class="card-body">
+                  <h5 class="card-title" id="total-auctions">0</h5>
+                  <p class="card-text">Total Auctions</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0 fade-in-up">
+              <div class="card text-center metric-card">
+                <div class="card-body">
+                  <h5 class="card-title" id="active-auctions">0</h5>
+                  <p class="card-text">Active Auctions</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 fade-in-up">
+              <div class="card text-center metric-card">
+                <div class="card-body">
+                  <h5 class="card-title" id="my-bids">0</h5>
+                  <p class="card-text">My Bids</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h2 class="h4 mb-3">Latest Auctions</h2>
+          <div id="auctions" class="row gy-4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+<script>
+  function renderAuction(auction) {
+    const now = new Date();
+    const ended = auction.endTime ? new Date(auction.endTime) <= now : false;
+    const statusClass = ended ? 'ended' : 'active';
+    const statusText = ended ? 'Closed' : 'Active';
+    return `
+      <div class="col-md-4 fade-in-up">
+        <div class="card h-100 auction-card">
+          <div class="auction-status ${statusClass}">${statusText}</div>
+          <img src="${auction.imageUrl || 'https://via.placeholder.com/400x240?text=No+Image'}" class="card-img-top" alt="${auction.title}">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${auction.title}</h5>
+            <p class="card-text text-truncate">${auction.description || ''}</p>
+            <p class="mb-1"><strong>Current Bid:</strong> ${auction.currentPrice ? formatCurrency(auction.currentPrice) : formatCurrency(auction.startingPrice)}</p>
+            <p class="mb-1"><strong>Ends:</strong> ${formatDateTime(auction.endTime)}</p>
+            <a href="/auction-detail.html?id=${auction.id}" class="mt-auto btn btn-primary">View Details</a>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function loadDashboard() {
+    // Load dashboard statistics
+    apiRequest('/auctions/dashboard/stats')
+      .then(stats => {
+        document.getElementById('total-auctions').textContent = stats.totalAuctions;
+        document.getElementById('active-auctions').textContent = stats.activeAuctions;
+      })
+      .catch(err => {
+        console.error('Failed to load dashboard stats:', err);
+        document.getElementById('total-auctions').textContent = '0';
+        document.getElementById('active-auctions').textContent = '0';
+      });
+
+    // Load auctions (only active ones for display)
+    apiRequest('/auctions/active')
+      .then(auctions => {
+        const container = document.getElementById('auctions');
+        if (!auctions || auctions.length === 0) {
+            container.innerHTML = `<div class="col-12"><div class="alert alert-info text-center">No auctions available</div></div>`;
+            return;
+        }
+        container.innerHTML = auctions.map(renderAuction).join('');
+      })
+      .catch(err => {
+        document.getElementById('auctions').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      });
+
+    // Load my bids count
+    if (isLoggedIn()) {
+      apiRequest('/bids/my')
+        .then(bids => {
+          document.getElementById('my-bids').textContent = bids.length;
+        })
+        .catch(() => {
+          document.getElementById('my-bids').textContent = '0';
+        });
+    }
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>
