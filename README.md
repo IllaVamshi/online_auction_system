@@ -131,7 +131,7 @@ The backend is built with Spring Boot 3.x, using:
 The frontend is a single-page-like application using vanilla JavaScript, HTML, and CSS, served from Spring Boot static resources.
 
 
-## Features
+3## Features
 
 - Dashboard: Displays total auctions, active auctions, and user bids  
 - Auctions Listing: View all auctions (active and closed)  
@@ -142,14 +142,14 @@ The frontend is a single-page-like application using vanilla JavaScript, HTML, a
 - Navigation: Dynamic navbar and sidebar based on login state  
 
 
-## Technologies
+3## Technologies
 
 - HTML5: Structure  
 - CSS3: Styling and responsive design  
 - JavaScript (ES6+): UI logic and API integration  
 
 
-## Key Files
+3## Key Files
 
 - `index.html`: Landing page  
 - `login.html`: Login page  
@@ -182,7 +182,7 @@ The frontend is a single-page-like application using vanilla JavaScript, HTML, a
 
 - mvn spring-boot:run
 
-The application will start on the configured port (e.g. http://localhost:8080).
+  The application will start on the configured port (e.g. http://localhost:8080).
 
 
 ### 3. Access the UI
